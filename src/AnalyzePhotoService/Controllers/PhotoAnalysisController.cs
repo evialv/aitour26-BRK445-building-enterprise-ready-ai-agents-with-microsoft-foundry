@@ -1,5 +1,6 @@
 using Microsoft.Agents.AI;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.AI;
 using SharedEntities;
 using System.Text.Json;
 using ZavaAgentsMetadata;
@@ -13,13 +14,16 @@ public class PhotoAnalysisController : ControllerBase
 {
     private readonly ILogger<PhotoAnalysisController> _logger;
     private readonly AIAgent _agentFxAgent;
+    private readonly IChatClient _chatClient;
 
     public PhotoAnalysisController(
         ILogger<PhotoAnalysisController> logger,
-        MAFLocalAgentProvider localAgentProvider)
+        MAFLocalAgentProvider localAgentProvider,
+        IChatClient chatClient)
     {
         _logger = logger;
         _agentFxAgent = localAgentProvider.GetAgentByName(AgentMetadata.GetAgentName(AgentType.PhotoAnalyzerAgent));
+        _chatClient = chatClient;
     }
 
     [HttpPost("analyzellm")]
@@ -32,13 +36,8 @@ public class PhotoAnalysisController : ControllerBase
 
         _logger.LogInformation($"{AgentMetadata.LogPrefixes.Llm} Analyzing photo. Prompt: {{Prompt}}", prompt);
 
-        // LLM endpoint uses MAF under the hood since we removed SK
-        return await AnalyzeWithAgentAsync(
-            prompt,
-            image.FileName,
-            async (analysisPrompt) => await GetAgentFxResponseAsync(analysisPrompt),
-            AgentMetadata.LogPrefixes.Llm,
-            cancellationToken);
+        // LLM endpoint uses IChatClient with vision model per architecture doc
+        return await AnalyzeWithVisionAsync(image, prompt, AgentMetadata.LogPrefixes.Llm, cancellationToken);
     }
 
     [HttpPost("analyzemaf_local")]  // Using constant AgentMetadata.FrameworkIdentifiers.MafLocal
@@ -51,12 +50,7 @@ public class PhotoAnalysisController : ControllerBase
 
         _logger.LogInformation($"{AgentMetadata.LogPrefixes.MafLocal} Analyzing photo. Prompt: {{Prompt}}", prompt);
 
-        return await AnalyzeWithAgentAsync(
-            prompt,
-            image.FileName,
-            async (analysisPrompt) => await GetAgentFxResponseAsync(analysisPrompt),
-            AgentMetadata.LogPrefixes.MafLocal,
-            cancellationToken);
+        return await AnalyzeWithVisionAsync(image, prompt, AgentMetadata.LogPrefixes.MafLocal, cancellationToken);
     }
 
     [HttpPost("analyzemaf_foundry")]  // Using constant AgentMetadata.FrameworkIdentifiers.MafFoundry
@@ -69,12 +63,7 @@ public class PhotoAnalysisController : ControllerBase
 
         _logger.LogInformation($"{AgentMetadata.LogPrefixes.MafFoundry} Analyzing photo. Prompt: {{Prompt}}", prompt);
 
-        return await AnalyzeWithAgentAsync(
-            prompt,
-            image.FileName,
-            async (analysisPrompt) => await GetAgentFxResponseAsync(analysisPrompt),
-            AgentMetadata.LogPrefixes.MafFoundry,
-            cancellationToken);
+        return await AnalyzeWithVisionAsync(image, prompt, AgentMetadata.LogPrefixes.MafFoundry, cancellationToken);
     }
 
     [HttpPost("analyzedirectcall")]
@@ -100,7 +89,70 @@ public class PhotoAnalysisController : ControllerBase
         return Ok(fallback);
     }
 
-    // Shared high-level analysis routine for both endpoints.
+    /// <summary>
+    /// Analyzes image using Azure OpenAI vision model via IChatClient per architecture doc.
+    /// Sends the actual image data as multimodal content.
+    /// </summary>
+    private async Task<ActionResult<PhotoAnalysisResult>> AnalyzeWithVisionAsync(
+        IFormFile image,
+        string userPrompt,
+        string logPrefix,
+        CancellationToken cancellationToken)
+    {
+        var fallbackDescription = BuildFallbackDescription(userPrompt);
+
+        try
+        {
+            // Read image bytes
+            using var ms = new MemoryStream();
+            await image.CopyToAsync(ms, cancellationToken);
+            var imageBytes = ms.ToArray();
+
+            // Build multimodal chat message with image + text
+            var systemPrompt = @"You are an AI assistant that analyzes photos of rooms for renovation and home-improvement projects.
+Analyze the provided image and the user's prompt, then return a JSON object with exactly two fields:
+  - description: a brief natural-language description of what the image shows and what renovation tasks are likely required
+  - detectedMaterials: an array of short strings naming materials, finishes or items that appear relevant (e.g. 'paint', 'tile', 'wood', 'grout')
+
+Return only valid JSON. Do not include any surrounding markdown or explanatory text.";
+
+            var messages = new List<ChatMessage>
+            {
+                new(ChatRole.System, systemPrompt),
+                new(ChatRole.User, 
+                [
+                    new DataContent(imageBytes, image.ContentType),
+                    new TextContent($"ImageFileName: {image.FileName}\nUserPrompt: {userPrompt}")
+                ])
+            };
+
+            var response = await _chatClient.GetResponseAsync(messages, cancellationToken: cancellationToken);
+            var agentRawResponse = response.Text ?? string.Empty;
+
+            _logger.LogInformation("{Prefix} Raw vision response length: {Length}", logPrefix, agentRawResponse.Length);
+
+            if (TryParsePhotoAnalysis(agentRawResponse, out var parsed))
+            {
+                return Ok(parsed);
+            }
+
+            _logger.LogWarning("{Prefix} Parsed result invalid or incomplete. Using heuristic fallback. Raw: {Raw}", logPrefix, TrimForLog(agentRawResponse));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "{Prefix} Vision analysis failed. Using heuristic fallback.", logPrefix);
+        }
+
+        // Fallback path.
+        var fallback = new PhotoAnalysisResult
+        {
+            Description = fallbackDescription,
+            DetectedMaterials = DetermineDetectedMaterials(userPrompt, image.FileName)
+        };
+        return Ok(fallback);
+    }
+
+    // Shared high-level analysis routine for text-only endpoints.
     private async Task<ActionResult<PhotoAnalysisResult>> AnalyzeWithAgentAsync(
         string userPrompt,
         string fileName,
