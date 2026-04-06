@@ -12,8 +12,8 @@
 
 <div class="search-container">
 	<div class="search-header">
-		<h1>🔍 Search Products</h1>
-		<p class="search-subtitle">Discover amazing outdoor products with intelligent search</p>
+		<h1>Search Products</h1>
+		<p class="search-subtitle">Discover products with intelligent AI-powered search</p>
 	</div>
 
 	<div class="search-section">
@@ -109,44 +109,43 @@
 
 <style>
 	:root {
-		--primary-color: #0066cc;
-		--primary-dark: #0052a3;
-		--accent-color: #00a4ef;
-		--success-color: #107c10;
-		--light-bg: #f5f5f5;
+		--primary-color: #6366f1;
+		--primary-dark: #4f46e5;
+		--accent-color: #6366f1;
+		--success-color: #059669;
+		--light-bg: #f8fafc;
 		--card-bg: #ffffff;
-		--text-primary: #333333;
-		--text-secondary: #666666;
-		--border-color: #e0e0e0;
-		--shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
-		--shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
-		--radius: 8px;
+		--text-primary: #0f172a;
+		--text-secondary: #64748b;
+		--border-color: #e2e8f0;
+		--shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+		--shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+		--radius: 12px;
 	}
 
 	.search-container {
 		max-width: 1200px;
 		margin: 0 auto;
-		padding: 40px 20px;
-		background: linear-gradient(135deg, #f5f7fa 0%, #e9f0f8 100%);
-		min-height: 100vh;
+		padding: 32px 20px;
+		background: transparent;
+		min-height: 100%;
 	}
 
 	.search-header {
-		text-align: center;
-		margin-bottom: 40px;
+		margin-bottom: 24px;
 		animation: fadeInDown 0.6s ease-out;
 	}
 
 	.search-header h1 {
-		font-size: 2.5em;
+		font-size: 1.75em;
 		color: var(--text-primary);
-		margin: 0 0 10px 0;
-		font-weight: 700;
-		letter-spacing: -0.5px;
+		margin: 0 0 6px 0;
+		font-weight: 800;
+		letter-spacing: -0.03em;
 	}
 
 	.search-subtitle {
-		font-size: 1.1em;
+		font-size: 0.9em;
 		color: var(--text-secondary);
 		margin: 0;
 		font-weight: 400;
@@ -155,22 +154,23 @@
 	.search-section {
 		background: var(--card-bg);
 		border-radius: var(--radius);
-		padding: 30px;
-		box-shadow: var(--shadow-md);
-		margin-bottom: 40px;
+		padding: 24px;
+		box-shadow: var(--shadow-sm);
+		border: 1px solid var(--border-color);
+		margin-bottom: 24px;
 		animation: fadeInUp 0.6s ease-out;
 	}
 
 	.search-input-wrapper {
-		margin-bottom: 24px;
+		margin-bottom: 16px;
 	}
 
 	.search-label {
 		display: block;
-		font-size: 1em;
+		font-size: 0.8125em;
 		font-weight: 600;
 		color: var(--text-primary);
-		margin-bottom: 12px;
+		margin-bottom: 8px;
 	}
 
 	.search-controls {
@@ -182,18 +182,20 @@
 	.search-input {
 		flex: 1;
 		min-width: 250px;
-		padding: 12px 16px;
-		font-size: 1em;
-		border: 2px solid var(--border-color);
+		padding: 10px 14px;
+		font-size: 0.875em;
+		border: 1.5px solid var(--border-color);
 		border-radius: var(--radius);
 		font-family: inherit;
-		transition: all 0.3s ease;
+		transition: all 0.2s ease;
+		background: var(--light-bg);
 	}
 
 	.search-input:focus {
 		outline: none;
 		border-color: var(--primary-color);
-		box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+		background: #fff;
 	}
 
 	.search-input:disabled {
@@ -203,22 +205,22 @@
 	}
 
 	.btn-search-primary {
-		padding: 12px 32px;
+		padding: 10px 24px;
 		background-color: var(--primary-color);
 		color: white;
 		border: none;
 		border-radius: var(--radius);
-		font-size: 1em;
+		font-size: 0.875em;
 		font-weight: 600;
 		cursor: pointer;
-		transition: all 0.3s ease;
-		box-shadow: var(--shadow-sm);
+		transition: all 0.2s ease;
+		box-shadow: 0 1px 3px rgba(99, 102, 241, 0.3);
 	}
 
 	.btn-search-primary:hover {
 		background-color: var(--primary-dark);
-		transform: translateY(-2px);
-		box-shadow: var(--shadow-md);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 	}
 
 	.btn-search-primary:active {
@@ -244,15 +246,15 @@
 
 	.btn-quick-question {
 		display: inline-block;
-		padding: 10px 20px;
+		padding: 8px 16px;
 		background-color: transparent;
 		color: var(--accent-color);
-		border: 2px solid var(--accent-color);
+		border: 1.5px solid var(--border-color);
 		border-radius: var(--radius);
-		font-size: 0.95em;
-		font-weight: 600;
+		font-size: 0.8125em;
+		font-weight: 500;
 		cursor: pointer;
-		transition: all 0.3s ease;
+		transition: all 0.2s ease;
 	}
 
 	.btn-quick-question:disabled {
@@ -293,18 +295,20 @@
 
 	.ai-response-box {
 		background-color: var(--light-bg);
-		border-left: 4px solid var(--success-color);
+		border-left: 3px solid var(--primary-color);
 		padding: 16px;
 		border-radius: var(--radius);
-		margin-top: 20px;
+		margin-top: 16px;
 		animation: slideInLeft 0.4s ease-out;
+		max-height: 400px;
+		overflow-y: auto;
 	}
 
 	.ai-response-label {
-		font-weight: 700;
+		font-weight: 600;
 		color: var(--text-primary);
 		margin-bottom: 8px;
-		font-size: 0.95em;
+		font-size: 0.8125em;
 	}
 
 	.ai-response-text {
@@ -317,6 +321,7 @@
 		color: var(--text-secondary);
 		margin: 0;
 		line-height: 1.6;
+		font-size: 0.875em;
 	}
 
 	.ai-response-content h1,
@@ -326,18 +331,18 @@
 	.ai-response-content h5,
 	.ai-response-content h6 {
 		color: var(--text-primary);
-		margin: 16px 0 8px 0;
+		margin: 12px 0 6px 0;
 		font-weight: 700;
 	}
 
 	.ai-response-content h2 {
-		font-size: 1.3em;
-		border-bottom: 2px solid var(--border-color);
-		padding-bottom: 8px;
+		font-size: 1.1em;
+		border-bottom: 1px solid var(--border-color);
+		padding-bottom: 6px;
 	}
 
 	.ai-response-content h3 {
-		font-size: 1.1em;
+		font-size: 1em;
 	}
 
 	.ai-response-content p {
@@ -427,14 +432,14 @@
 		border-radius: var(--radius);
 		overflow: hidden;
 		box-shadow: var(--shadow-sm);
-		transition: all 0.3s ease;
+		border: 1px solid var(--border-color);
+		transition: all 0.2s ease;
 		display: flex;
 		flex-direction: column;
 		height: 100%;
 	}
 
 	.product-card:hover {
-		transform: translateY(-8px);
 		box-shadow: var(--shadow-md);
 	}
 
@@ -620,7 +625,20 @@
 	private string searchTerm = "";
 	private List<SharedEntities.Product>? products;
 	private string aiResponse = "";
-	private bool smartSearch = false;
+	private bool _smartSearch = false;
+	private bool smartSearch
+	{
+		get => _smartSearch;
+		set
+		{
+			if (_smartSearch != value)
+			{
+				_smartSearch = value;
+				aiResponse = "";
+				products = null;
+			}
+		}
+	}
 	private bool isSearching = false;
 
 	private async Task DoSearch(MouseEventArgs e)

@@ -2,25 +2,29 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
 }
 
 main {
     flex: 1;
+    overflow-y: auto;
 }
 
 .sidebar {
-    background: linear-gradient(180deg, #2c3e50 0%, #34495e 70%);
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    background: #0f172a !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .top-row {
-    background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
-    border-bottom: 1px solid #bdc3c7;
+    background: #ffffff !important;
+    border-bottom: 1px solid #f1f5f9 !important;
     justify-content: flex-end;
     height: 3.5rem;
     display: flex;
     align-items: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 0;
 }
 
     .top-row ::deep a, .top-row ::deep .btn-link {
@@ -62,6 +66,7 @@ main {
         height: 100vh;
         position: sticky;
         top: 0;
+        z-index: 10;
     }
 
     .top-row {
