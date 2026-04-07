@@ -1,5 +1,6 @@
 @page "/settings"
 @inject IJSRuntime JSRuntime
+@inject Store.Services.AgentFrameworkService AgentFrameworkService
 @using ZavaWorkingModes
 @rendermode InteractiveServer
 
@@ -120,8 +121,9 @@
 
     private async Task OnModeChanged()
     {
-        // Save to localStorage
-        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "agentFramework", selectedMode);
+        // Save to localStorage and update the in-memory cache
+        var mode = WorkingModeProvider.Parse(selectedMode);
+        await AgentFrameworkService.SetSelectedModeAsync(mode);
         
         // Show saved message
         showSavedMessage = true;
