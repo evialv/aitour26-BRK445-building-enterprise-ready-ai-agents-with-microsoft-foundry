@@ -85,16 +85,13 @@ public class MAFFoundryAgentProvider
             deploymentName = _configuration["AI_ChatDeploymentName"] ?? "gpt-5-mini";
         }
 
-        // Route through the Foundry Agent API endpoint (services.ai.azure.com)
-        // instead of calling Azure OpenAI directly (cognitiveservices.azure.com).
-        // This ensures Foundry guardrails (PII, content safety) are enforced on all calls.
         var azureOpenAIChatClient =  _projectClient.GetAzureOpenAIChatClient(deploymentName);
-        var foundryEndpoint = azureOpenAIChatClient.Endpoint;
 
         // get credentials        
         DefaultAzureCredential tokenCredential = GetAzureCredentials();
+        var endpoint = new Uri(NormalizeEndpoint(azureOpenAIChatClient.Endpoint.AbsoluteUri));
         var azureOpenAIClient = new AzureOpenAIClient(
-            endpoint: foundryEndpoint,
+            endpoint: endpoint,
             credential: tokenCredential);
 
         return azureOpenAIClient
@@ -110,13 +107,11 @@ public class MAFFoundryAgentProvider
         }
         var azureOpenAIEmbeddingClient = _projectClient.GetAzureOpenAIEmbeddingClient(deploymentName);
 
-        // Route through the Foundry Agent API endpoint to enforce guardrails
-        var foundryEndpoint = azureOpenAIEmbeddingClient.Endpoint;
-
         // get credentials        
         DefaultAzureCredential tokenCredential = GetAzureCredentials();
+        var endpoint = new Uri(NormalizeEndpoint(azureOpenAIEmbeddingClient.Endpoint.AbsoluteUri));
         var azureOpenAIClient = new AzureOpenAIClient(
-            endpoint: foundryEndpoint,
+            endpoint: endpoint,
             credential: tokenCredential);
 
         return azureOpenAIClient
