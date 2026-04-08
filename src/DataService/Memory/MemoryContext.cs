@@ -132,14 +132,14 @@ Format your response in clear, well-structured markdown with:
 - Use bullet points for product lists
 - Use **bold** for important information
 - Use > for important notes
-    - User Question: {search}
     - Found Products: 
 {sbFoundProducts}";
 
             var messages = new List<Microsoft.Extensions.AI.ChatMessage>
             {
                 new(ChatRole.System, _systemPrompt),
-                new(ChatRole.System, prompt)
+                new(ChatRole.System, prompt),
+                new(ChatRole.User, search)
             };
 
             _logger.LogInformation("{ChatHistory}", JsonConvert.SerializeObject(messages));
@@ -147,6 +147,17 @@ Format your response in clear, well-structured markdown with:
             var resultPrompt = await _chatClient.GetResponseAsync(messages);
             response.Response = resultPrompt.Text!;
 
+        }
+        catch (Exception ex) when (ex.Message.Contains("content_filter", StringComparison.OrdinalIgnoreCase)
+                                 || ex.Message.Contains("ContentFilter", StringComparison.OrdinalIgnoreCase)
+                                 || ex.Message.Contains("content management policy", StringComparison.OrdinalIgnoreCase)
+                                 || ex.Message.Contains("ResponsibleAI", StringComparison.OrdinalIgnoreCase)
+                                 || ex.Message.Contains("jailbreak", StringComparison.OrdinalIgnoreCase))
+        {
+            response.Response = "⛔ **Guardrail Blocked:** Your request was flagged and blocked by the Azure AI content safety guardrail. " +
+                "The system detected a potential jailbreak or prompt injection attempt. " +
+                "This is an enterprise safety control that protects AI agents from misuse.";
+            _logger.LogWarning(ex, "Content filter triggered for search query");
         }
         catch (Exception ex)
         {
